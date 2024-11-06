@@ -1,12 +1,11 @@
 "use client"
 
 import React, { useState } from 'react'
-import { Home, TrendingUp, Activity, FileText, DollarSign, Search, Moon, User, ArrowRight, ExternalLink, PieChart, Briefcase, BarChart3, Scissors, Users, BookOpen, Calendar } from 'lucide-react'
+import { Home, TrendingUp, Activity, FileText, DollarSign, Search, Moon, User, ArrowRight, ExternalLink, PieChart, Briefcase, BarChart3, Scissors, Users, Calendar } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import Image from 'next/image';
 
 const NavItem = ({ icon, text, active = false }: { icon: React.ReactNode; text: string; active?: boolean }) => (
   <button className={`flex items-center space-x-2 px-4 py-2 rounded-lg ${active ? 'border-b-2 border-teal-600' : ''}`}>

@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 
 declare global {
   interface Window {
-    Supademo?: (apiKey: string, options: any) => void;
+    Supademo?: (apiKey: string, options: { variables: { email: string, name: string } }) => void;
   }
 }
 
@@ -60,7 +60,26 @@ export default function LandingPage() {
   const t = content[language];
 
   useEffect(() => {
-    const initializeSupademo = () => {
+    // Function to dynamically load the Supademo SDK script
+    const loadSupademoScript = () => {
+      return new Promise<void>((resolve, reject) => {
+        if (document.getElementById("supademo-script")) {
+          resolve();
+          return;
+        }
+
+        const script = document.createElement("script");
+        script.id = "supademo-script";
+        script.src = "https://script.supademo.com/script.js"; // Add your SDK URL
+        script.async = true;
+        script.onload = () => resolve();
+        script.onerror = () => reject(new Error("Failed to load Supademo SDK"));
+        document.body.appendChild(script);
+      });
+    };
+
+    // Initialize Supademo only after the script has loaded
+    loadSupademoScript().then(() => {
       if (typeof window.Supademo === 'function') {
         window.Supademo("676938268ca84b1f3bc3005b5af13069cda8cc8ef4daa395f8ac488c74440311", {
           variables: {
@@ -68,12 +87,8 @@ export default function LandingPage() {
             name: ""
           }
         });
-      } else {
-        setTimeout(initializeSupademo, 1000);
       }
-    };
-
-    initializeSupademo();
+    }).catch(error => console.error(error));
   }, []);
 
   return (
@@ -81,7 +96,7 @@ export default function LandingPage() {
       <header className="sticky top-0 bg-white z-50 px-4 py-4 shadow-sm">
         <div className="container mx-auto">
           <nav className="flex items-center justify-between space-x-4">
-            <Link href="/" className="flex items-center gap-2">
+            <Link href="/" className="flex items-center gap-2" aria-label="Go to home">
               <span className="text-2xl font-bold text-teal-700">ImiovaDemo</span>
             </Link>
             <div className="hidden md:flex items-center gap-8">
@@ -169,13 +184,13 @@ export default function LandingPage() {
               className="relative z-10"
             />
             <div className="absolute right-0 top-1/2 -translate-y-1/2 flex flex-col gap-4 text-gray-400">
-              <Link href="#" className="hover:text-teal-700 transition-colors">
+              <Link href="#" className="hover:text-teal-700 transition-colors" aria-label="LinkedIn">
                 <Linkedin className="w-6 h-6" />
               </Link>
-              <Link href="#" className="hover:text-teal-700 transition-colors">
+              <Link href="#" className="hover:text-teal-700 transition-colors" aria-label="Instagram">
                 <Instagram className="w-6 h-6" />
               </Link>
-              <Link href="#" className="hover:text-teal-700 transition-colors">
+              <Link href="#" className="hover:text-teal-700 transition-colors" aria-label="Facebook">
                 <Facebook className="w-6 h-6" />
               </Link>
               <div className="writing-mode-vertical-rl rotate-180 text-sm font-medium mt-4">
