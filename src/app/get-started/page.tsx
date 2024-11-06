@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { useRouter } from 'next/navigation'
 import IntroPage from "@/components/intro-page"
+import { ChevronLeft, ChevronRight } from "lucide-react"
 
 const fontUrl = "https://use.typekit.net/gcd4kuc.css";
 
@@ -121,44 +122,95 @@ export default function GetStarted() {
               <div className="flex flex-col items-center justify-center">
                 <div className="w-full space-y-6">
                   <h2 className="text-2xl font-semibold mb-6 text-center">{currentQuestion.sentence}</h2>
-                  <RadioGroup
-                    value={selectedAnswers[currentQuestionIndex] || ""}
-                    onValueChange={handleAnswerChange}
-                    className="space-y-4"
-                  >
-                    {currentQuestion.options.map((option) => (
-                      <div
-                        key={option}
-                        className={`relative flex items-center p-5 rounded-lg
-                          ${
-                            selectedAnswers[currentQuestionIndex] === option
-                              ? "bg-teal-100 border-2 border-teal-500"
-                              : "bg-transparent border border-gray-300 hover:border-teal-500 hover:bg-teal-50"
-                          }`}
-                      >
-                        <RadioGroupItem value={option} id={option} className="absolute left-4 top-1/2 -translate-y-1/2" />
-                        <Label
-                          htmlFor={option}
-                          className="pl-8 cursor-pointer flex-grow text-base font-medium text-lg"
+                  
+                  {/* Desktop version */}
+                  <div className="hidden md:block">
+                    <RadioGroup
+                      value={selectedAnswers[currentQuestionIndex] || ""}
+                      onValueChange={handleAnswerChange}
+                      className="space-y-4"
+                    >
+                      {currentQuestion.options.map((option) => (
+                        <div
+                          key={option}
+                          className={`relative flex items-center p-5 rounded-lg
+                            ${
+                              selectedAnswers[currentQuestionIndex] === option
+                                ? "bg-teal-100 border-2 border-teal-500"
+                                : "bg-transparent border border-gray-300 hover:border-teal-500 hover:bg-teal-50"
+                            }`}
                         >
-                          {option}
-                        </Label>
-                      </div>
-                    ))}
-                  </RadioGroup>
+                          <RadioGroupItem value={option} id={`desktop-${option}`} className="absolute left-4 top-1/2 -translate-y-1/2" />
+                          <Label
+                            htmlFor={`desktop-${option}`}
+                            className="pl-8 cursor-pointer flex-grow text-base font-medium text-lg"
+                          >
+                            {option}
+                          </Label>
+                        </div>
+                      ))}
+                    </RadioGroup>
+                  </div>
+
+                  {/* Mobile version */}
+                  <div className="md:hidden">
+                    <RadioGroup
+                      value={selectedAnswers[currentQuestionIndex] || ""}
+                      onValueChange={handleAnswerChange}
+                      className="space-y-3"
+                    >
+                      {currentQuestion.options.map((option) => (
+                        <div
+                          key={option}
+                          className={`relative flex items-center p-4 rounded-lg
+                            ${
+                              selectedAnswers[currentQuestionIndex] === option
+                                ? "bg-teal-100 border-2 border-teal-500"
+                                : "bg-transparent border border-gray-300"
+                            }`}
+                        >
+                          <RadioGroupItem value={option} id={`mobile-${option}`} className="absolute left-3 top-1/2 -translate-y-1/2" />
+                          <Label
+                            htmlFor={`mobile-${option}`}
+                            className="pl-7 cursor-pointer flex-grow text-sm font-medium"
+                          >
+                            {option}
+                          </Label>
+                        </div>
+                      ))}
+                    </RadioGroup>
+                  </div>
+
+                  {/* Navigation buttons */}
                   <div className="flex justify-between mt-6">
                     <Button
                       onClick={handleBack}
-                      className="px-6 py-2 text-xl rounded-full bg-transparent border border-gray-300 hover:bg-transparent hover:border-gray-500 text-gray-900 transition duration-300 ease-in-out"
+                      className="px-4 py-2 text-base md:text-xl rounded-full bg-transparent border border-gray-300 hover:bg-transparent hover:border-gray-500 text-gray-900 transition duration-300 ease-in-out"
                     >
-                      ← Back
+                      <ChevronLeft className="w-4 h-4 md:w-5 md:h-5 mr-1" />
+                      <span className="hidden md:inline">Back</span>
                     </Button>
                     <Button
                       onClick={handleNext}
-                      className="px-6 py-2 text-xl rounded-full bg-transparent border border-gray-300 hover:bg-transparent hover:border-teal-500 hover:bg-teal-50 text-gray-900 transition duration-300 ease-in-out"
+                      className="px-4 py-2 text-base md:text-xl rounded-full bg-transparent border border-gray-300 hover:bg-transparent hover:border-teal-500 hover:bg-teal-50 text-gray-900 transition duration-300 ease-in-out"
                     >
-                      {currentQuestionIndex === totalQuestions - 1 ? "Finish" : "Next →"}
+                      <span className="hidden md:inline">
+                        {currentQuestionIndex === totalQuestions - 1 ? "Finish" : "Next"}
+                      </span>
+                      <ChevronRight className="w-4 h-4 md:w-5 md:h-5 ml-1" />
                     </Button>
+                  </div>
+
+                  {/* Progress indicator */}
+                  <div className="mt-4 flex justify-center items-center space-x-2">
+                    {funnelData.questions.map((_, index) => (
+                      <div
+                        key={index}
+                        className={`w-2 h-2 rounded-full ${
+                          index === currentQuestionIndex ? 'bg-teal-500' : 'bg-gray-300'
+                        }`}
+                      />
+                    ))}
                   </div>
                 </div>
               </div>
