@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button"
 import { useRouter } from 'next/navigation'
 import IntroPage from "@/components/intro-page"
 import { ChevronLeft, ChevronRight } from "lucide-react"
-import { motion, AnimatePresence } from "framer-motion"
 
 const fontUrl = "https://use.typekit.net/gcd4kuc.css";
 
@@ -61,7 +60,6 @@ export default function GetStarted() {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [selectedAnswers, setSelectedAnswers] = useState<(string | null)[]>(new Array(funnelData.questions.length).fill(null))
   const [isVisible, setIsVisible] = useState(false)
-  const [direction, setDirection] = useState(0)
   const router = useRouter()
 
   const currentQuestion = funnelData.questions[currentQuestionIndex]
@@ -93,7 +91,6 @@ export default function GetStarted() {
 
   const handleNext = () => {
     if (currentQuestionIndex < totalQuestions - 1) {
-      setDirection(1)
       setCurrentQuestionIndex(currentQuestionIndex + 1)
     } else {
       handleFinish()
@@ -102,7 +99,6 @@ export default function GetStarted() {
 
   const handleBack = () => {
     if (currentQuestionIndex > 0) {
-      setDirection(-1)
       setCurrentQuestionIndex(currentQuestionIndex - 1)
     } else {
       router.push('/')
@@ -115,27 +111,6 @@ export default function GetStarted() {
     router.push('/dashboard')
   }
 
-  const variants = {
-    enter: (direction: number) => {
-      return {
-        x: direction > 0 ? 1000 : -1000,
-        opacity: 0
-      };
-    },
-    center: {
-      zIndex: 1,
-      x: 0,
-      opacity: 1
-    },
-    exit: (direction: number) => {
-      return {
-        zIndex: 0,
-        x: direction < 0 ? 1000 : -1000,
-        opacity: 0
-      };
-    }
-  };
-
   return (
     <div className="flex flex-col min-h-screen bg-white" style={{ fontFamily: 'circe, sans-serif' }}>
       <main className="flex-1 container mx-auto px-4 py-8 flex items-center justify-center">
@@ -143,53 +118,56 @@ export default function GetStarted() {
           <IntroPage />
         ) : (
           <Card className={`w-full max-w-2xl bg-white-100 bg-opacity-60 border-none transition-opacity duration-1000 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
-            <CardContent className="p-6 bg-transparent">
-              <div className="flex flex-col items-center justify-center h-[calc(100vh-4rem)]">
-                <div className="w-full space-y-6 relative overflow-hidden">
-                  <AnimatePresence initial={false} custom={direction}>
-                    <motion.div
-                      key={currentQuestionIndex}
-                      custom={direction}
-                      variants={variants}
-                      initial="enter"
-                      animate="center"
-                      exit="exit"
-                      transition={{
-                        x: { type: "spring", stiffness: 300, damping: 30 },
-                        opacity: { duration: 0.2 }
-                      }}
-                      className="absolute w-full"
-                    >
-                      <h2 className="text-xl md:text-2xl font-semibold mb-4 text-center">{currentQuestion.sentence}</h2>
-                      
-                      {/* Mobile-optimized RadioGroup */}
-                      <RadioGroup
-                        value={selectedAnswers[currentQuestionIndex] || ""}
-                        onValueChange={handleAnswerChange}
-                        className="space-y-2"
+            <CardContent className="p-4 md:p-6 bg-transparent">
+              <div className="flex flex-col items-center justify-center min-h-[calc(100vh-8rem)] md:min-h-0">
+                <div className="w-full space-y-4 md:space-y-6">
+                  <h2 className="text-xl md:text-2xl font-semibold mb-4 text-center">{currentQuestion.sentence}</h2>
+                  
+                  <RadioGroup
+                    value={selectedAnswers[currentQuestionIndex] || ""}
+                    onValueChange={handleAnswerChange}
+                    className="space-y-2 md:space-y-3"
+                  >
+                    {currentQuestion.options.map((option) => (
+                      <div
+                        key={option}
+                        className={`relative flex items-center p-3 md:p-4 rounded-lg
+                          ${
+                            selectedAnswers[currentQuestionIndex] === option
+                              ? "bg-teal-100 border-2 border-teal-500"
+                              : "bg-transparent border border-gray-300"
+                          }`}
                       >
-                        {currentQuestion.options.map((option) => (
-                          <div
-                            key={option}
-                            className={`relative flex items-center p-3 rounded-lg
-                              ${
-                                selectedAnswers[currentQuestionIndex] === option
-                                  ? "bg-teal-100 border-2 border-teal-500"
-                                  : "bg-transparent border border-gray-300"
-                              }`}
-                          >
-                            <RadioGroupItem value={option} id={option} className="absolute left-2 top-1/2 -translate-y-1/2" />
-                            <Label
-                              htmlFor={option}
-                              className="pl-6 cursor-pointer flex-grow text-sm font-medium"
-                            >
-                              {option}
-                            </Label>
-                          </div>
-                        ))}
-                      </RadioGroup>
-                    </motion.div>
-                  </AnimatePresence>
+                        <RadioGroupItem value={option} id={option} className="absolute left-2 md:left-3 top-1/2 -translate-y-1/2" />
+                        <Label
+                          htmlFor={option}
+                          className="pl-6 md:pl-8 cursor-pointer flex-grow text-sm md:text-base font-medium"
+                        >
+                          {option}
+                        </Label>
+                      </div>
+                    ))}
+                  </RadioGroup>
+
+                  {/* Desktop navigation */}
+                  <div className="hidden md:flex justify-between mt-6">
+                    <Button
+                      onClick={handleBack}
+                      variant="outline"
+                      className="px-6 py-2 text-base rounded-full"
+                    >
+                      <ChevronLeft className="w-5 h-5 mr-2" />
+                      Back
+                    </Button>
+                    <Button
+                      onClick={handleNext}
+                      variant="outline"
+                      className="px-6 py-2 text-base rounded-full"
+                    >
+                      {currentQuestionIndex === totalQuestions - 1 ? "Finish" : "Next"}
+                      <ChevronRight className="w-5 h-5 ml-2" />
+                    </Button>
+                  </div>
                 </div>
               </div>
             </CardContent>
@@ -197,9 +175,9 @@ export default function GetStarted() {
         )}
       </main>
       
-      {/* Fixed bottom navigation bar */}
+      {/* Mobile navigation */}
       {!showIntro && (
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 flex justify-between items-center">
+        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 flex justify-between items-center">
           <Button
             onClick={handleBack}
             variant="ghost"

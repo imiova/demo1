@@ -1,11 +1,12 @@
 "use client"
 
 import React, { useState } from 'react'
-import { Home, TrendingUp, Activity, FileText, DollarSign, Search, Moon, User, ArrowRight, ExternalLink, PieChart, Briefcase, BarChart3, Scissors, Users, Calendar } from 'lucide-react'
+import { Home, TrendingUp, Activity, FileText, DollarSign, Search, Moon, User, ArrowRight, ExternalLink, PieChart, Briefcase, BarChart3, Scissors, Users, Calendar, Menu } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 
 const NavItem = ({ icon, text, active = false }: { icon: React.ReactNode; text: string; active?: boolean }) => (
   <button className={`flex items-center space-x-2 px-4 py-2 rounded-lg ${active ? 'border-b-2 border-teal-600' : ''}`}>
@@ -36,7 +37,7 @@ const HelpCard = ({ title, description, icon }: { title: string; description: st
 
 const CalendarDay = ({ day, isAvailable, isSelected, onClick }: { day: number; isAvailable: boolean; isSelected: boolean; onClick: () => void }) => (
   <button
-    className={`w-12 h-12 rounded-full flex items-center justify-center ${
+    className={`w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center ${
       isSelected
         ? 'bg-teal-500 text-white'
         : isAvailable
@@ -52,7 +53,7 @@ const CalendarDay = ({ day, isAvailable, isSelected, onClick }: { day: number; i
 
 const TimeSlot = ({ time, isAvailable, isSelected, onClick }: { time: string; isAvailable: boolean; isSelected: boolean; onClick: () => void }) => (
   <button
-    className={`py-3 px-4 rounded-lg text-center ${
+    className={`py-2 px-3 md:py-3 md:px-4 rounded-lg text-center ${
       isSelected
         ? 'bg-teal-500 text-white'
         : isAvailable
@@ -70,6 +71,7 @@ export default function Dashboard() {
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedDate, setSelectedDate] = useState<number | null>(null)
   const [selectedTime, setSelectedTime] = useState<string | null>(null)
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   const handleBookConsultation = () => {
     if (selectedDate && selectedTime) {
@@ -86,7 +88,7 @@ export default function Dashboard() {
       <header className="border-b">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-center justify-between h-16">
-            <div className="flex items-center space-x-8">
+            <div className="flex items-center space-x-4">
               <span className="text-2xl font-bold text-teal-600">ImiovaDemo</span>
               <nav className="hidden md:flex space-x-2">
                 <NavItem icon={<Home className="w-5 h-5" />} text="Home" active />
@@ -97,7 +99,7 @@ export default function Dashboard() {
               </nav>
             </div>
             <div className="flex items-center space-x-4">
-              <div className="relative">
+              <div className="relative hidden md:block">
                 <Search className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                 <Input
                   type="text"
@@ -107,12 +109,37 @@ export default function Dashboard() {
                   className="pl-10 w-64 rounded-full"
                 />
               </div>
-              <Button variant="ghost" size="icon">
+              <Button variant="ghost" size="icon" className="hidden md:inline-flex">
                 <Moon className="w-5 h-5" />
               </Button>
-              <Button variant="ghost" size="icon">
+              <Button variant="ghost" size="icon" className="hidden md:inline-flex">
                 <User className="w-5 h-5" />
               </Button>
+              <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="icon" className="md:hidden">
+                    <Menu className="w-5 h-5" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="left" className="w-[300px] sm:w-[400px]">
+                  <nav className="flex flex-col space-y-4 mt-8">
+                    <NavItem icon={<Home className="w-5 h-5" />} text="Home" active />
+                    <NavItem icon={<TrendingUp className="w-5 h-5" />} text="Strategies" />
+                    <NavItem icon={<Activity className="w-5 h-5" />} text="Portfolio" />
+                    <NavItem icon={<FileText className="w-5 h-5" />} text="Tax" />
+                    <NavItem icon={<DollarSign className="w-5 h-5" />} text="Calculators" />
+                  </nav>
+                  <div className="mt-8">
+                    <Input
+                      type="text"
+                      placeholder="Search strategies or tools"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="w-full"
+                    />
+                  </div>
+                </SheetContent>
+              </Sheet>
             </div>
           </div>
         </div>
@@ -200,7 +227,7 @@ export default function Dashboard() {
                     <DialogTitle className="text-2xl font-bold mb-4">Book a Consultation</DialogTitle>
                   </DialogHeader>
                   <div className="flex-grow overflow-auto">
-                    <div className="grid grid-cols-2 gap-8 h-full">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 h-full">
                       <div>
                         <h4 className="text-lg font-medium mb-4">Select a Date</h4>
                         <div className="grid grid-cols-7 gap-2">
