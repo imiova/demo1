@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { useRouter } from 'next/navigation'
 import IntroPage from "@/components/intro-page"
 import { ChevronLeft, ChevronRight } from "lucide-react"
+import { motion, AnimatePresence } from "framer-motion"
 
 const fontUrl = "https://use.typekit.net/gcd4kuc.css";
 
@@ -60,6 +61,7 @@ export default function GetStarted() {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [selectedAnswers, setSelectedAnswers] = useState<(string | null)[]>(new Array(funnelData.questions.length).fill(null))
   const [isVisible, setIsVisible] = useState(false)
+  const [direction, setDirection] = useState(0)
   const router = useRouter()
 
   const currentQuestion = funnelData.questions[currentQuestionIndex]
@@ -91,6 +93,7 @@ export default function GetStarted() {
 
   const handleNext = () => {
     if (currentQuestionIndex < totalQuestions - 1) {
+      setDirection(1)
       setCurrentQuestionIndex(currentQuestionIndex + 1)
     } else {
       handleFinish()
@@ -99,6 +102,7 @@ export default function GetStarted() {
 
   const handleBack = () => {
     if (currentQuestionIndex > 0) {
+      setDirection(-1)
       setCurrentQuestionIndex(currentQuestionIndex - 1)
     } else {
       router.push('/')
@@ -111,6 +115,27 @@ export default function GetStarted() {
     router.push('/dashboard')
   }
 
+  const variants = {
+    enter: (direction: number) => {
+      return {
+        x: direction > 0 ? 1000 : -1000,
+        opacity: 0
+      };
+    },
+    center: {
+      zIndex: 1,
+      x: 0,
+      opacity: 1
+    },
+    exit: (direction: number) => {
+      return {
+        zIndex: 0,
+        x: direction < 0 ? 1000 : -1000,
+        opacity: 0
+      };
+    }
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-white" style={{ fontFamily: 'circe, sans-serif' }}>
       <main className="flex-1 container mx-auto px-4 py-8 flex items-center justify-center">
@@ -119,105 +144,88 @@ export default function GetStarted() {
         ) : (
           <Card className={`w-full max-w-2xl bg-white-100 bg-opacity-60 border-none transition-opacity duration-1000 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
             <CardContent className="p-6 bg-transparent">
-              <div className="flex flex-col items-center justify-center">
-                <div className="w-full space-y-6">
-                  <h2 className="text-2xl font-semibold mb-6 text-center">{currentQuestion.sentence}</h2>
-                  
-                  {/* Desktop version */}
-                  <div className="hidden md:block">
-                    <RadioGroup
-                      value={selectedAnswers[currentQuestionIndex] || ""}
-                      onValueChange={handleAnswerChange}
-                      className="space-y-4"
+              <div className="flex flex-col items-center justify-center h-[calc(100vh-4rem)]">
+                <div className="w-full space-y-6 relative overflow-hidden">
+                  <AnimatePresence initial={false} custom={direction}>
+                    <motion.div
+                      key={currentQuestionIndex}
+                      custom={direction}
+                      variants={variants}
+                      initial="enter"
+                      animate="center"
+                      exit="exit"
+                      transition={{
+                        x: { type: "spring", stiffness: 300, damping: 30 },
+                        opacity: { duration: 0.2 }
+                      }}
+                      className="absolute w-full"
                     >
-                      {currentQuestion.options.map((option) => (
-                        <div
-                          key={option}
-                          className={`relative flex items-center p-5 rounded-lg
-                            ${
-                              selectedAnswers[currentQuestionIndex] === option
-                                ? "bg-teal-100 border-2 border-teal-500"
-                                : "bg-transparent border border-gray-300 hover:border-teal-500 hover:bg-teal-50"
-                            }`}
-                        >
-                          <RadioGroupItem value={option} id={`desktop-${option}`} className="absolute left-4 top-1/2 -translate-y-1/2" />
-                          <Label
-                            htmlFor={`desktop-${option}`}
-                            className="pl-8 cursor-pointer flex-grow text-base font-medium text-lg"
+                      <h2 className="text-xl md:text-2xl font-semibold mb-4 text-center">{currentQuestion.sentence}</h2>
+                      
+                      {/* Mobile-optimized RadioGroup */}
+                      <RadioGroup
+                        value={selectedAnswers[currentQuestionIndex] || ""}
+                        onValueChange={handleAnswerChange}
+                        className="space-y-2"
+                      >
+                        {currentQuestion.options.map((option) => (
+                          <div
+                            key={option}
+                            className={`relative flex items-center p-3 rounded-lg
+                              ${
+                                selectedAnswers[currentQuestionIndex] === option
+                                  ? "bg-teal-100 border-2 border-teal-500"
+                                  : "bg-transparent border border-gray-300"
+                              }`}
                           >
-                            {option}
-                          </Label>
-                        </div>
-                      ))}
-                    </RadioGroup>
-                  </div>
-
-                  {/* Mobile version */}
-                  <div className="md:hidden">
-                    <RadioGroup
-                      value={selectedAnswers[currentQuestionIndex] || ""}
-                      onValueChange={handleAnswerChange}
-                      className="space-y-3"
-                    >
-                      {currentQuestion.options.map((option) => (
-                        <div
-                          key={option}
-                          className={`relative flex items-center p-4 rounded-lg
-                            ${
-                              selectedAnswers[currentQuestionIndex] === option
-                                ? "bg-teal-100 border-2 border-teal-500"
-                                : "bg-transparent border border-gray-300"
-                            }`}
-                        >
-                          <RadioGroupItem value={option} id={`mobile-${option}`} className="absolute left-3 top-1/2 -translate-y-1/2" />
-                          <Label
-                            htmlFor={`mobile-${option}`}
-                            className="pl-7 cursor-pointer flex-grow text-sm font-medium"
-                          >
-                            {option}
-                          </Label>
-                        </div>
-                      ))}
-                    </RadioGroup>
-                  </div>
-
-                  {/* Navigation buttons */}
-                  <div className="flex justify-between mt-6">
-                    <Button
-                      onClick={handleBack}
-                      className="px-4 py-2 text-base md:text-xl rounded-full bg-transparent border border-gray-300 hover:bg-transparent hover:border-gray-500 text-gray-900 transition duration-300 ease-in-out"
-                    >
-                      <ChevronLeft className="w-4 h-4 md:w-5 md:h-5 mr-1" />
-                      <span className="hidden md:inline">Back</span>
-                    </Button>
-                    <Button
-                      onClick={handleNext}
-                      className="px-4 py-2 text-base md:text-xl rounded-full bg-transparent border border-gray-300 hover:bg-transparent hover:border-teal-500 hover:bg-teal-50 text-gray-900 transition duration-300 ease-in-out"
-                    >
-                      <span className="hidden md:inline">
-                        {currentQuestionIndex === totalQuestions - 1 ? "Finish" : "Next"}
-                      </span>
-                      <ChevronRight className="w-4 h-4 md:w-5 md:h-5 ml-1" />
-                    </Button>
-                  </div>
-
-                  {/* Progress indicator */}
-                  <div className="mt-4 flex justify-center items-center space-x-2">
-                    {funnelData.questions.map((_, index) => (
-                      <div
-                        key={index}
-                        className={`w-2 h-2 rounded-full ${
-                          index === currentQuestionIndex ? 'bg-teal-500' : 'bg-gray-300'
-                        }`}
-                      />
-                    ))}
-                  </div>
+                            <RadioGroupItem value={option} id={option} className="absolute left-2 top-1/2 -translate-y-1/2" />
+                            <Label
+                              htmlFor={option}
+                              className="pl-6 cursor-pointer flex-grow text-sm font-medium"
+                            >
+                              {option}
+                            </Label>
+                          </div>
+                        ))}
+                      </RadioGroup>
+                    </motion.div>
+                  </AnimatePresence>
                 </div>
               </div>
             </CardContent>
           </Card>
         )}
       </main>
+      
+      {/* Fixed bottom navigation bar */}
+      {!showIntro && (
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 flex justify-between items-center">
+          <Button
+            onClick={handleBack}
+            variant="ghost"
+            className="text-gray-600"
+          >
+            <ChevronLeft className="w-6 h-6" />
+          </Button>
+          <div className="flex space-x-1">
+            {funnelData.questions.map((_, index) => (
+              <div
+                key={index}
+                className={`w-2 h-2 rounded-full ${
+                  index === currentQuestionIndex ? 'bg-teal-500' : 'bg-gray-300'
+                }`}
+              />
+            ))}
+          </div>
+          <Button
+            onClick={handleNext}
+            variant="ghost"
+            className="text-gray-600"
+          >
+            {currentQuestionIndex === totalQuestions - 1 ? "Finish" : <ChevronRight className="w-6 h-6" />}
+          </Button>
+        </div>
+      )}
     </div>
   )
 }
